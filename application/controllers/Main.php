@@ -17,31 +17,51 @@ class Main extends CI_Controller {
     public function index() {
         $data['title'] = 'Dashboard';
 
-        // Panggil API Lokasi
-        $responseLokasi = $this->client->request('GET', 'lokasi');
-        $lokasiData = json_decode($responseLokasi->getBody()->getContents());
+        try {
+            // Panggil API Lokasi
+            $responseLokasi = $this->client->request('GET', 'lokasi');
+            $lokasiData = json_decode($responseLokasi->getBody()->getContents());
 
-        // Hitung jumlah lokasi
-        if (isset($lokasiData->data)) {
-            $data['jumlahLokasi'] = count($lokasiData->data); // Menghitung jumlah lokasi
-        } else {
-            $data['jumlahLokasi'] = 0; // Set sebagai 0 jika tidak ada data
+            // Cek apakah data lokasi valid
+            if (isset($lokasiData->data)) {
+                $data['lokasi'] = $lokasiData->data;
+                $data['jumlahLokasi'] = count($lokasiData->data);
+            } else {
+                $data['lokasi'] = [];
+                $data['jumlahLokasi'] = 0;
+            }
+
+        } catch (GuzzleHttp\Exception\ClientException $e) {
+            // Jika API lokasi gagal, set jumlahLokasi ke 0
+            $data['lokasi'] = [];
+            $data['jumlahLokasi'] = 0;
         }
 
-        // Panggil API Proyek
-        $responseProyek = $this->client->request('GET', 'proyek');
-        $proyekData = json_decode($responseProyek->getBody()->getContents());
+        try {
+            // Panggil API Proyek
+            $responseProyek = $this->client->request('GET', 'proyek');
+            $proyekData = json_decode($responseProyek->getBody()->getContents());
 
-        // Hitung jumlah proyek
-        if (isset($proyekData->data)) {
-            $data['jumlahProyek'] = count($proyekData->data); // Menghitung jumlah proyek
-        } else {
-            $data['jumlahProyek'] = 0; // Set sebagai 0 jika tidak ada data
+            // Cek apakah data proyek valid
+            if (isset($proyekData->data)) {
+                $data['proyek'] = $proyekData->data;
+                $data['jumlahProyek'] = count($proyekData->data);
+            } else {
+                $data['proyek'] = [];
+                $data['jumlahProyek'] = 0;
+            }
+
+        } catch (GuzzleHttp\Exception\ClientException $e) {
+            // Jika API proyek gagal, set jumlahProyek ke 0
+            $data['proyek'] = [];
+            $data['jumlahProyek'] = 0;
         }
 
+        // Load view
         $this->load->view('layouts/header', $data);
         $this->load->view('layouts/sidebar', $data);
-        $this->load->view('main_view', $data); // Load view dengan statistik
+        $this->load->view('main_view', $data);
         $this->load->view('layouts/footer', $data);
     }
+
 }

@@ -19,14 +19,22 @@ class Lokasi extends CI_Controller {
     public function index() {
         $data['title'] = 'Daftar Lokasi';
 
-        // Panggil API untuk mendapatkan data lokasi
-        $responseLokasi = $this->client->request('GET', 'lokasi');
-        $lokasiData = json_decode($responseLokasi->getBody()->getContents());
+        try {
+            // Panggil API untuk mendapatkan data lokasi
+            $responseLokasi = $this->client->request('GET', 'lokasi');
+            $lokasiData = json_decode($responseLokasi->getBody()->getContents());
 
-        if (isset($lokasiData->data)) {
-            $data['lokasi'] = $lokasiData->data;
-        } else {
+            if (isset($lokasiData->data)) {
+                $data['lokasi'] = $lokasiData->data;
+            } else {
+                $data['lokasi'] = [];
+                $data['error_message'] = 'Data lokasi kosong.';
+            }
+
+        } catch (GuzzleHttp\Exception\ClientException $e) {
+            // Tangani error 404 atau lainnya
             $data['lokasi'] = [];
+            $data['error_message'] = 'Data lokasi tidak ditemukan atau terjadi kesalahan saat mengambil data.';
         }
 
         // Load view untuk menampilkan daftar lokasi
