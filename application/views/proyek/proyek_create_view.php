@@ -41,8 +41,6 @@
                             <?php foreach ($lokasi as $loc): ?>
                                 <option value="<?php echo $loc->id; ?>"><?php echo $loc->namaLokasi; ?></option>
                             <?php endforeach; ?>
-                        <?php else: ?>
-                            <option value="">Data lokasi tidak tersedia</option>
                         <?php endif; ?>
                     </select>
                 </div>
