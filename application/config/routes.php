@@ -57,6 +57,7 @@ $route['lokasi/create'] = 'lokasi/create';
 $route['lokasi/edit/(:num)'] = 'lokasi/edit/$1';
 $route['lokasi/delete/(:num)'] = 'lokasi/delete/$1';
 
+$route['proyek'] = 'proyek';
 $route['proyek/create'] = 'proyek/create';
 $route['proyek/edit/(:num)'] = 'proyek/edit/$1';
 $route['proyek/delete/(:num)'] = 'proyek/delete/$1';

@@ -40,6 +40,7 @@ class Lokasi extends CI_Controller {
         // Load view untuk menampilkan daftar lokasi
         $this->load->view('layouts/header', $data);
         $this->load->view('layouts/sidebar', $data);
+        $this->load->view('layouts/topbar', $data);
         $this->load->view('lokasi/lokasi_view', $data);
         $this->load->view('layouts/footer', $data);
     }
@@ -51,6 +52,7 @@ class Lokasi extends CI_Controller {
         // Load view untuk menampilkan form tambah lokasi
         $this->load->view('layouts/header', $data);
         $this->load->view('layouts/sidebar', $data);
+        $this->load->view('layouts/topbar', $data);
         $this->load->view('lokasi/lokasi_create_view', $data);
         $this->load->view('layouts/footer', $data);
     }
@@ -89,17 +91,16 @@ class Lokasi extends CI_Controller {
             }
 
             if ($data['lokasi'] === null) {
-                $this->session->set_flashdata('error', 'Data lokasi tidak ditemukan.');
-                redirect('lokasi');
+                $data['error_message'] = 'Proyek tidak ditemukan.';
             }
         } else {
-            $this->session->set_flashdata('error', 'Gagal mendapatkan data lokasi.');
-            redirect('lokasi');
+            $data['error_message'] = 'Gagal mendapatkan data.';
         }
 
         // Load view untuk menampilkan form edit lokasi
         $this->load->view('layouts/header', $data);
         $this->load->view('layouts/sidebar', $data);
+        $this->load->view('layouts/topbar', $data);
         $this->load->view('lokasi/lokasi_edit_view', $data);
         $this->load->view('layouts/footer', $data);
     }

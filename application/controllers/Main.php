@@ -1,4 +1,5 @@
 <?php
+defined('BASEPATH') OR exit('No direct script access allowed');
 
 use GuzzleHttp\Client;
 
@@ -17,51 +18,52 @@ class Main extends CI_Controller {
     public function index() {
         $data['title'] = 'Dashboard';
 
+        // Panggil API Lokasi dan Proyek secara bersamaan menggunakan Promise
         try {
-            // Panggil API Lokasi
-            $responseLokasi = $this->client->request('GET', 'lokasi');
-            $lokasiData = json_decode($responseLokasi->getBody()->getContents());
+            $promises = [
+                'lokasi' => $this->client->getAsync('lokasi'),
+                'proyek' => $this->client->getAsync('proyek'),
+            ];
 
-            // Cek apakah data lokasi valid
-            if (isset($lokasiData->data)) {
-                $data['lokasi'] = $lokasiData->data;
-                $data['jumlahLokasi'] = count($lokasiData->data);
+            $responses = \GuzzleHttp\Promise\Utils::settle($promises)->wait();
+
+            // Mengolah data lokasi
+            if ($responses['lokasi']['state'] === 'fulfilled') {
+                $lokasiData = json_decode($responses['lokasi']['value']->getBody()->getContents(), true);
+                $data['lokasi'] = $lokasiData['data'] ?? [];
+                $data['jumlahLokasi'] = count($data['lokasi']);
             } else {
                 $data['lokasi'] = [];
                 $data['jumlahLokasi'] = 0;
             }
 
-        } catch (GuzzleHttp\Exception\ClientException $e) {
-            // Jika API lokasi gagal, set jumlahLokasi ke 0
-            $data['lokasi'] = [];
-            $data['jumlahLokasi'] = 0;
-        }
-
-        try {
-            // Panggil API Proyek
-            $responseProyek = $this->client->request('GET', 'proyek');
-            $proyekData = json_decode($responseProyek->getBody()->getContents());
-
-            // Cek apakah data proyek valid
-            if (isset($proyekData->data)) {
-                $data['proyek'] = $proyekData->data;
-                $data['jumlahProyek'] = count($proyekData->data);
+            // Mengolah data proyek
+            if ($responses['proyek']['state'] === 'fulfilled') {
+                $proyekData = json_decode($responses['proyek']['value']->getBody()->getContents(), true);
+                $data['proyek'] = $proyekData['data'] ?? [];
+                $data['jumlahProyek'] = count($data['proyek']);
             } else {
                 $data['proyek'] = [];
                 $data['jumlahProyek'] = 0;
             }
-
-        } catch (GuzzleHttp\Exception\ClientException $e) {
-            // Jika API proyek gagal, set jumlahProyek ke 0
+        } catch (Exception $e) {
+            // Jika terjadi error pada seluruh API
+            $data['lokasi'] = [];
+            $data['jumlahLokasi'] = 0;
             $data['proyek'] = [];
             $data['jumlahProyek'] = 0;
         }
 
         // Load view
-        $this->load->view('layouts/header', $data);
-        $this->load->view('layouts/sidebar', $data);
-        $this->load->view('main_view', $data);
-        $this->load->view('layouts/footer', $data);
+        $this->loadViews('main_view', $data);
     }
 
+    // Helper method untuk memuat views secara konsisten
+    private function loadViews($view, $data = []) {
+        $this->load->view('layouts/header', $data);
+        $this->load->view('layouts/sidebar', $data);
+        $this->load->view('layouts/topbar', $data);
+        $this->load->view($view, $data);
+        $this->load->view('layouts/footer', $data);
+    }
 }
